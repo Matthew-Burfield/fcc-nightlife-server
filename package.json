@@ -1,0 +1,23 @@
+{
+  "name": "nightlife-server",
+  "version": "1.0.0",
+  "description": "Simple base app with react, react-router v4, hot-reload &amp; sass.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Matthew-Burfield/fcc-nightlife-server.git"
+  },
+  "author": "Matthew Burfield <burfie@hotmail.com> (https://matthew-burfield.github.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Matthew-Burfield/fcc-nightlife-server/issues"
+  },
+  "homepage": "https://github.com/Matthew-Burfield/fcc-nightlife-server#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
