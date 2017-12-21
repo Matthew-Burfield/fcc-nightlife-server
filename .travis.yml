@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+- 6
+- 8
+cache:
+  directories:
+  - node_modules
+install:
+- yarn
+before_script:
+- export CI=false
+script:
+- yarn build
+deploy:
+  provider: heroku
+  api_key:
+    secure: rKv+1YoEvMliZjY8VqxCxeEmts+PpNipw8nTsFcwienpY/kLINtHqSIiQhDX1kTwJOGtE4RS5b4M3mcDyPkxpQSaXQRDLP4HpB9xg2SROMMutrswbU+U6Hl54AiNtu6LwkSlLI9m0A8G3SEgubyaW4iYBqhAp7jFmRd9PWZ51XqrRs7YP8BdqFG3uwbSaMNZtefglR30E25cHBKQiE38wc+hbRR1cjxXLEGykv/5Decff7Bcu/+ahBf5kOOOZhTxPebYbg0ysNYF1JpwWuIYKo5zYikr6ExD/agLOHIov5/viYWgIssxZmJakOD61CrgXpT4fLj3wCmZDUPmUjHoWA70TWhzaxvugIcCF8FkepqZAJ5hZEpdQM1PRSEWlJlR5WLxXV4xRrPzDHe2RniZggW6G37Nh78nGPjXMzmUr4GBttldHuQX835sVAhTt4hXk+/4NkbpNw4hXycxQdi27jqHcYP2CULmF9+pTaLvWYChXD1pENxl6cjzcMvRY08Oida5YcmzQjwPZXJupjAgbel7ibdqUP2XXPIpFrrP524aSRHjLUDZZUoxglVrkvPdoEcLWKOD5n5gzwUDw/ng7UdjulccgoecFzg9hoQaqmTMNqhV7jTYcKwHyCHJTu2/qRnkN9XJMlHB/LxmG30JFSlEK7dqqfzfXHNlx1M11LU=
+  app: burfield-nightlife-server
+  on:
+    repo: Matthew-Burfield/fcc-nightlife-server
