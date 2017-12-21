@@ -4,7 +4,7 @@
   "description": "Simple base app with react, react-router v4, hot-reload &amp; sass.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node_modules/mocha/bin/mocha -R spec spec.js",
     "start": "node server.js"
   },
   "repository": {
@@ -19,5 +19,11 @@
   "homepage": "https://github.com/Matthew-Burfield/fcc-nightlife-server#readme",
   "dependencies": {
     "express": "^4.16.2"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
+    "mocha": "^4.0.1",
+    "supertest": "^3.0.0"
   }
 }

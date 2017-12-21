@@ -6,4 +6,6 @@ app.get('/', (req, res) => res.send('Hello world!'))
 
 const port = process.env.PORT || 8000
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+module.exports = server
