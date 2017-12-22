@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "node_modules/mocha/bin/mocha -R spec spec.js",
+    "dev": "nf run nodemon server.js",
     "start": "node server.js"
   },
   "repository": {
@@ -18,6 +19,7 @@
   },
   "homepage": "https://github.com/Matthew-Burfield/fcc-nightlife-server#readme",
   "dependencies": {
+    "axios": "^0.17.1",
     "express": "^4.16.2"
   },
   "devDependencies": {
