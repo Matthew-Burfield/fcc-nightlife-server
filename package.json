@@ -20,7 +20,9 @@
   "homepage": "https://github.com/Matthew-Burfield/fcc-nightlife-server#readme",
   "dependencies": {
     "axios": "^0.17.1",
-    "express": "^4.16.2"
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "mongo": "^0.1.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

@@ -1,9 +1,31 @@
-const express = require('express')
 const axios = require('axios')
+const cors = require('cors')
+const express = require('express')
+const mongodb = require('mongodb')
 
 const app = express()
 
-// comment
+const corsOptions = {
+  origin: 'http://burfield-nightlife.surge.sh',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors(corsOptions))
+
+const mongoUri = process.env.MONGO_CONNECTION
+const connectToDatabase = (res, callback) => {
+	const response = (db, err, responseValues) => {
+		db.close()
+		if (err) {
+			returnError(res, err)
+		} else {
+			res.json(Object.assign({}, { success: true }, responseValues))	
+		}
+	}
+	mongodb.MongoClient.connect(mongoUri, function(err, db) {
+		if (err) returnError(res, err)
+		callback(db, response)
+	})
+}
 
 axios.defaults.baseURL = 'https://api.yelp.com'
 axios.defaults.headers.common['Authorization'] = `Bearer ${process.env.YELP_API_KEY}`
@@ -26,7 +48,23 @@ app.get('/getRestaurants', (req, res) => {
 	}`)
 	.then((response) => {
 		if (response && response.data) {
-			res.json(response.data)
+			const listOfRestaurantIds = response.data.data.search.business.map(biz => biz.id)
+			connectToDatabase(res, (db) => {
+				db.collection('restaurant')
+				.aggregate([ 
+					{
+						$match: { id: { $in: listOfRestaurantIds } },
+					},
+					{
+						$group: { _id: "$id", count: { $sum: 1 } }
+					},
+				])
+				.toArray(function(err, result) {
+					res.json(result)
+					db.close()
+				})
+			})
+			// res.json(response.data)
 		} else {
 			res.sendStatus(500)
 		}
