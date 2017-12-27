@@ -1,35 +1,35 @@
 {
-  "name": "nightlife-server",
-  "version": "1.0.0",
-  "description": "Simple base app with react, react-router v4, hot-reload &amp; sass.",
-  "main": "server.js",
-  "scripts": {
-    "test": "node_modules/mocha/bin/mocha -R spec spec.js",
-    "dev": "nf run nodemon server.js",
-    "start": "node server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Matthew-Burfield/fcc-nightlife-server.git"
-  },
-  "author": "Matthew Burfield <burfie@hotmail.com> (https://matthew-burfield.github.io/)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Matthew-Burfield/fcc-nightlife-server/issues"
-  },
-  "homepage": "https://github.com/Matthew-Burfield/fcc-nightlife-server#readme",
-  "dependencies": {
-    "axios": "^0.17.1",
-    "cors": "^2.8.4",
-    "express": "^4.16.2",
-    "mongo": "^0.1.0",
-    "oauth": "^0.9.15",
-    "url": "^0.11.0"
-  },
-  "devDependencies": {
-    "chai": "^4.1.2",
-    "chai-http": "^3.0.0",
-    "mocha": "^4.0.1",
-    "supertest": "^3.0.0"
-  }
+	"name": "nightlife-server",
+	"version": "1.0.0",
+	"description": "Simple base app with react, react-router v4, hot-reload &amp; sass.",
+	"main": "server.js",
+	"scripts": {
+		"test": "node_modules/mocha/bin/mocha -R spec spec.js",
+		"dev": "nf run NODE_ENV=development nodemon server.js",
+		"start": "NODE_ENV=production node server.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Matthew-Burfield/fcc-nightlife-server.git"
+	},
+	"author": "Matthew Burfield <burfie@hotmail.com> (https://matthew-burfield.github.io/)",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Matthew-Burfield/fcc-nightlife-server/issues"
+	},
+	"homepage": "https://github.com/Matthew-Burfield/fcc-nightlife-server#readme",
+	"dependencies": {
+		"axios": "^0.17.1",
+		"cors": "^2.8.4",
+		"express": "^4.16.2",
+		"mongo": "^0.1.0",
+		"oauth": "^0.9.15",
+		"url": "^0.11.0"
+	},
+	"devDependencies": {
+		"chai": "^4.1.2",
+		"chai-http": "^3.0.0",
+		"mocha": "^4.0.1",
+		"supertest": "^3.0.0"
+	}
 }

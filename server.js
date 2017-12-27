@@ -5,10 +5,14 @@ const express = require('express')
 const mongodb = require('mongodb')
 const nodeUrl = require('url')
 const oauth = require('oauth').OAuth
+const getBaseUrl = require('./utilities').getBaseUrl
 
+const app = express()
+
+const baseUrl = getBaseUrl(app.get('env'))
 const corsOptions = {
-	origin: 'http://burfield-nightlife.surge.sh',
-	optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+	origin: baseUrl,
+	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
 const mongoUri = process.env.MONGO_CONNECTION
@@ -23,7 +27,6 @@ const oa = new oauth(
 	'HMAC-SHA1'
 )
 
-const app = express()
 app.use(bodyParser.json())
 app.use(cors(corsOptions))
 
@@ -36,7 +39,7 @@ const connectToDatabase = (res, callback) => {
 			res.json(Object.assign({}, { success: true }, responseValues))
 		}
 	}
-	mongodb.MongoClient.connect(mongoUri, function (err, db) {
+	mongodb.MongoClient.connect(mongoUri, function(err, db) {
 		if (err) returnError(res, err)
 		callback(db, response)
 	})
@@ -51,7 +54,10 @@ app.get('/', (req, res) => res.send('Hello world!'))
 
 app.post('/restaurants', (req, res) => {
 	const location = req.body.location
-	axios.post('/v3/graphql', `{
+	axios
+		.post(
+			'/v3/graphql',
+			`{
 			search(location: "${location}") {
 				total
 				business {
@@ -61,25 +67,27 @@ app.post('/restaurants', (req, res) => {
 						photos
 					}
 			}
-	}`)
-		.then((response) => {
+	}`
+		)
+		.then(response => {
 			if (response && response.data) {
 				const restaurantList = response.data.data.search.business.reduce((obj, item) => {
 					obj[item.id] = Object.assign({}, item, { count: 0 })
 					return obj
 				}, {})
 				const restaurantIds = Object.keys(restaurantList)
-				connectToDatabase(res, (db) => {
-					db.collection('restaurant')
+				connectToDatabase(res, db => {
+					db
+						.collection('restaurant')
 						.aggregate([
 							{
 								$match: { id: { $in: restaurantIds } },
 							},
 							{
-								$group: { _id: "$id", count: { $sum: 1 } }
+								$group: { _id: '$id', count: { $sum: 1 } },
 							},
 						])
-						.toArray(function (err, result) {
+						.toArray(function(err, result) {
 							result.forEach(restaurant => {
 								restaurantList[restaurant._id].count = restaurant.count
 							})
@@ -87,26 +95,71 @@ app.post('/restaurants', (req, res) => {
 							db.close()
 						})
 				})
-				// res.json(response.data)
 			} else {
-				res.sendStatus(500)
+				res.status(500).send('Server error: no response from Yelp')
 			}
 		})
 })
 
 app.get('/login', (req, res) => {
-	oa.getOAuthRequestToken(function (error, oAuthToken, oAuthTokenSecret, results) {
-		res.redirect(`https://api.twitter.com/oauth/authenticate?oauth_token=${oAuthToken}`);
+	oa.getOAuthRequestToken((error, oauth_request_token, oauth_request_token_secret, results) => {
+		if (results.oauth_callback_confirmed === 'true') {
+			// send oauth_token and oauth_secret back to client and redirect from there
+			res.redirect(
+				`${baseUrl}/login#request_token=${oauth_request_token}&request_secret=${oauth_request_token_secret}`
+			)
+		} else {
+			res.status(500).send('Server error: no callback')
+		}
 	})
 })
 
 app.get('/authenticate', (req, res) => {
-	console.log(req.query.oauth_token)
-	console.log(req.query.oauth_verifier)
+	const { token, secret, verifier } = req.query
+	const callback = (param1, oauth_access_token, oauth_access_token_secret, results) => {
+		res.redirect(
+			`${baseUrl}/access#access_token=${oauth_access_token}&access_secret=${oauth_access_token_secret}`
+		)
+	}
+	oa.getOAuthAccessToken(token, secret, verifier, callback)
+})
+
+app.get('/authenticate', (req, res) => {
+	const oauth_verifier = req.query.oauth_verifier
+	const callback = (param1, oauth_access_token, oauth_access_token_secret, results) => {
+		console.log(results)
+		res.redirect(
+			`${baseUrl}/login#user_id=${results.user_id}&screen_name=${
+				results.screen_name
+			}&x_auth_expires=${results.x_auth_expires}`
+		)
+	}
+	if (oauth_token !== req.query.oauth_token) {
+		res.status(500).send("Server error: tokens don't match")
+	} else {
+		oa.getOAuthAccessToken(oauth_token, oauth_token_secret, oauth_verifier, callback)
+	}
+})
+
+app.get('/tweet', (req, res) => {
+	const accessToken = req.query.access_token
+	const accessSecret = req.query.access_secret
+	oa.get(
+		'https://api.twitter.com/1.1/account/verify_credentials.json',
+		accessToken, //test user token
+		accessSecret, //test user secret
+		function(e, data, res) {
+			if (e) console.error(e)
+			console.log(require('util').inspect(data))
+			done()
+		}
+	)
 })
 
 const port = process.env.PORT || 8000
 
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const server = app.listen(port, () =>
+	console.log(`Example app listening on port ${port}, in ${app.get('env')} mode!`)
+)
 
 module.exports = server
