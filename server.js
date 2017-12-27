@@ -20,8 +20,8 @@ const mongoUri = process.env.MONGO_CONNECTION
 const oa = new oauth(
 	'https://api.twitter.com/oauth/request_token',
 	'https://api.twitter.com/oauth/access_token',
-	'g15QnzcwkricnTa1tmVoQfIMF', // Consumer key
-	'mZ7ZxpggaTvYnE0J9d3oEoDeUv7Bnwolk5kKakEjdHELIqtlaW', // Consumer secret
+	process.env.OAUTH_CONSUMER_KEY, // Consumer key
+	process.env.OAUTH_CONSUMER_SECRET, // Consumer secret
 	'1.0',
 	null,
 	'HMAC-SHA1'
@@ -122,23 +122,6 @@ app.get('/authenticate', (req, res) => {
 		)
 	}
 	oa.getOAuthAccessToken(token, secret, verifier, callback)
-})
-
-app.get('/authenticate', (req, res) => {
-	const oauth_verifier = req.query.oauth_verifier
-	const callback = (param1, oauth_access_token, oauth_access_token_secret, results) => {
-		console.log(results)
-		res.redirect(
-			`${baseUrl}/login#user_id=${results.user_id}&screen_name=${
-				results.screen_name
-			}&x_auth_expires=${results.x_auth_expires}`
-		)
-	}
-	if (oauth_token !== req.query.oauth_token) {
-		res.status(500).send("Server error: tokens don't match")
-	} else {
-		oa.getOAuthAccessToken(oauth_token, oauth_token_secret, oauth_verifier, callback)
-	}
 })
 
 app.get('/tweet', (req, res) => {
