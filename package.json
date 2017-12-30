@@ -4,7 +4,7 @@
 	"description": "Simple base app with react, react-router v4, hot-reload &amp; sass.",
 	"main": "server.js",
 	"scripts": {
-		"test": "node_modules/mocha/bin/mocha -R spec spec.js",
+		"test": "jest",
 		"dev": "nf run NODE_ENV=development nodemon server.js",
 		"start": "NODE_ENV=production node server.js"
 	},
@@ -27,9 +27,8 @@
 		"url": "^0.11.0"
 	},
 	"devDependencies": {
-		"chai": "^4.1.2",
-		"chai-http": "^3.0.0",
-		"mocha": "^4.0.1",
-		"supertest": "^3.0.0"
+		"babel-core": "^6.26.0",
+		"babel-preset-env": "^1.6.1",
+		"jest": "^22.0.4"
 	}
 }
