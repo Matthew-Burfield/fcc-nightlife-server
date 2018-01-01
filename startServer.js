@@ -104,17 +104,10 @@ const startServer = () => {
 			connectToDatabase(res, db => {
 				db
 					.collection('restaurant')
-					.aggregate([
-						{
-							$match: { id: { $in: restaurantIds } },
-						},
-						{
-							$group: { _id: '$id', count: { $sum: 1 } },
-						},
-					])
+					.find()
 					.toArray(function(err, result) {
 						result.forEach(restaurant => {
-							restaurantList[restaurant._id].count = restaurant.count
+							restaurantList[restaurant.id].count = restaurant.users.length
 						})
 						res.json(restaurantList)
 						db.close()
@@ -128,60 +121,64 @@ const startServer = () => {
 	app.post('/register', authenticateToken, (req, res) => {
 		const id = req.body.id
 		const userId = req.user.id
-		connectToDatabase(res, async db => {
-			const restaurant = await db
-				.collection('restaurant')
-				.findOne({ id })
-				.then(result => result)
-
-			if (restaurant === null) {
-				db
+		if (id && id.length > 0) {
+			connectToDatabase(res, async db => {
+				const restaurant = await db
 					.collection('restaurant')
-					.insertOne({
-						id,
-						users: [userId],
-					})
-					.then(result => {
-						console.log(result)
-						res.send('done')
-						db.close()
-					})
-			} else {
-				if (restaurant.users.includes(userId)) {
+					.findOne({ id })
+					.then(result => result)
+
+				if (restaurant === null) {
 					db
 						.collection('restaurant')
-						.updateOne(
-							{
-								id,
-							},
-							{
-								$pull: { users: userId },
-							}
-						)
+						.insertOne({
+							id,
+							users: [userId],
+						})
 						.then(result => {
 							console.log(result)
 							res.send('done')
 							db.close()
 						})
 				} else {
-					db
-						.collection('restaurant')
-						.updateOne(
-							{
-								id,
-							},
-							{
-								$push: { users: userId },
-							}
-						)
-						.then(result => {
-							console.log(result)
-							res.send('done')
-							db.close()
-						})
+					if (restaurant.users.includes(userId)) {
+						db
+							.collection('restaurant')
+							.updateOne(
+								{
+									id,
+								},
+								{
+									$pull: { users: userId },
+								}
+							)
+							.then(result => {
+								console.log(result)
+								res.send('done')
+								db.close()
+							})
+					} else {
+						db
+							.collection('restaurant')
+							.updateOne(
+								{
+									id,
+								},
+								{
+									$push: { users: userId },
+								}
+							)
+							.then(result => {
+								console.log(result)
+								res.send('done')
+								db.close()
+							})
+					}
 				}
-			}
-		})
+			})
+		} else {
+			res.status(500).send('id is required')
+		}
 	})
 
 	app.get('/login', (req, res) => {
