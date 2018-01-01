@@ -9,10 +9,8 @@
 			"request": "launch",
 			"name": "Launch Program",
 			"program": "${workspaceFolder}/server.js",
-			"environment": [
-				{"name":"MONGO_CONNECTION", "value":"mongodb://admin:admin1234@ds157653.mlab.com:57653/burfield-nightlife"},
-				{"name":"YELP_API_KEY", "value": "czNXYMHg9AVq2TyhZgChZg6EtJ897SLlagr-3ev5_upH_W7VtAyLgfbb2QAeq9mehynEzlaTos3W2oFjtLXpNVB7AkajQtFrDVS7nhxKfxhl03O-hmcoWHMAqYk8WnYx"}
-			]
+			"envFile": "${workspaceFolder}/.env",
+			"runtimeExecutable": "/Users/matthewburfield/.nvm/v9.3.0/bin/node"
 		}
 	]
 }
