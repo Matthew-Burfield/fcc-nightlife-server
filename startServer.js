@@ -62,7 +62,8 @@ const startServer = () => {
 					console.error(error)
 					res.status(401).send('Fail!')
 				}
-				console.log(require('util').inspect(data))
+				// console.log(require('util').inspect(data))
+				req.user = JSON.parse(data)
 				next()
 			}
 		)
@@ -71,7 +72,7 @@ const startServer = () => {
 	app.get('/', (req, res) => res.send('Hello world!'))
 
 	app.get('/testAuth', authenticateToken, (req, res) => {
-		console.log('Authenticated!')
+		console.log('Authenticated!', req.user.screen_name)
 		res.send('Authenticated!')
 	})
 
