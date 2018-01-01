@@ -4,7 +4,7 @@
 	"description": "Simple base app with react, react-router v4, hot-reload &amp; sass.",
 	"main": "server.js",
 	"scripts": {
-		"test": "jest",
+		"test": "jest --watch",
 		"dev": "nf run NODE_ENV=development nodemon server.js",
 		"start": "NODE_ENV=production node server.js"
 	},
@@ -29,6 +29,11 @@
 	"devDependencies": {
 		"babel-core": "^6.26.0",
 		"babel-preset-env": "^1.6.1",
-		"jest": "^22.0.4"
+		"jest": "^22.0.4",
+		"jsdom": "^11.5.1"
+	},
+	"jest": {
+		"testURL": "http://localhost:3000",
+		"testEnvironment": "node"
 	}
 }

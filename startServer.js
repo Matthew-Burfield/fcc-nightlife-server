@@ -53,53 +53,55 @@ const startServer = () => {
 
 	app.get('/', (req, res) => res.send('Hello world!'))
 
-	app.post('/restaurants', (req, res) => {
+	app.post('/restaurants', async (req, res) => {
 		const location = req.body.location
-		axios
+		console.log(location)
+		const result = await axios
 			.post(
 				'/v3/graphql',
 				`{
-			search(location: "${location}") {
-				total
-				business {
-						name
-						id
-						rating
-						photos
+					search(location: "${location}") {
+						total
+						business {
+								name
+								id
+								rating
+								photos
+							}
 					}
-			}
-	}`
+				}`
 			)
-			.then(response => {
-				if (response && response.data) {
-					const restaurantList = response.data.data.search.business.reduce((obj, item) => {
-						obj[item.id] = Object.assign({}, item, { count: 0 })
-						return obj
-					}, {})
-					const restaurantIds = Object.keys(restaurantList)
-					connectToDatabase(res, db => {
-						db
-							.collection('restaurant')
-							.aggregate([
-								{
-									$match: { id: { $in: restaurantIds } },
-								},
-								{
-									$group: { _id: '$id', count: { $sum: 1 } },
-								},
-							])
-							.toArray(function(err, result) {
-								result.forEach(restaurant => {
-									restaurantList[restaurant._id].count = restaurant.count
-								})
-								res.json(restaurantList)
-								db.close()
-							})
-					})
-				} else {
-					res.status(500).send('Server error: no response from Yelp')
-				}
-			})
+			.then(response => response)
+			.catch(error => error)
+		console.log(result)
+		// if (response && response.data) {
+		// 	const restaurantList = response.data.data.search.business.reduce((obj, item) => {
+		// 		obj[item.id] = Object.assign({}, item, { count: 0 })
+		// 		return obj
+		// 	}, {})
+		// 	const restaurantIds = Object.keys(restaurantList)
+		// 	connectToDatabase(res, db => {
+		// 		db
+		// 			.collection('restaurant')
+		// 			.aggregate([
+		// 				{
+		// 					$match: { id: { $in: restaurantIds } },
+		// 				},
+		// 				{
+		// 					$group: { _id: '$id', count: { $sum: 1 } },
+		// 				},
+		// 			])
+		// 			.toArray(function(err, result) {
+		// 				result.forEach(restaurant => {
+		// 					restaurantList[restaurant._id].count = restaurant.count
+		// 				})
+		// 				res.json(restaurantList)
+		// 				db.close()
+		// 			})
+		// 	})
+		// } else {
+		// 	res.status(500).send('Server error: no response from Yelp')
+		// }
 	})
 
 	app.get('/login', (req, res) => {
