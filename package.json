@@ -4,7 +4,8 @@
 	"description": "Simple base app with react, react-router v4, hot-reload &amp; sass.",
 	"main": "server.js",
 	"scripts": {
-		"test": "jest --watch",
+		"test": "jest",
+		"test:watch": "jest --watch",
 		"dev": "nf run NODE_ENV=development nodemon server.js",
 		"start": "NODE_ENV=production node server.js"
 	},
