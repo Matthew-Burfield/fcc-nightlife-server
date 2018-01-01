@@ -78,7 +78,6 @@ const startServer = () => {
 
 	app.post('/restaurants', async (req, res) => {
 		const location = req.body.location
-		console.log(location)
 		const result = await axios
 			.post(
 				'/v3/graphql',
@@ -94,10 +93,10 @@ const startServer = () => {
 					}
 				}`
 			)
-			.then(response => response)
+			.then(response => response.data)
 			.catch(error => error)
-		if (response && response.data) {
-			const restaurantList = response.data.data.search.business.reduce((obj, item) => {
+		if (result) {
+			const restaurantList = result.data.search.business.reduce((obj, item) => {
 				obj[item.id] = Object.assign({}, item, { count: 0 })
 				return obj
 			}, {})
@@ -124,6 +123,65 @@ const startServer = () => {
 		} else {
 			res.status(500).send('Server error: no response from Yelp')
 		}
+	})
+
+	app.post('/register', authenticateToken, (req, res) => {
+		const id = req.body.id
+		const userId = req.user.id
+		connectToDatabase(res, async db => {
+			const restaurant = await db
+				.collection('restaurant')
+				.findOne({ id })
+				.then(result => result)
+
+			if (restaurant === null) {
+				db
+					.collection('restaurant')
+					.insertOne({
+						id,
+						users: [userId],
+					})
+					.then(result => {
+						console.log(result)
+						res.send('done')
+						db.close()
+					})
+			} else {
+				if (restaurant.users.includes(userId)) {
+					db
+						.collection('restaurant')
+						.updateOne(
+							{
+								id,
+							},
+							{
+								$pull: { users: userId },
+							}
+						)
+						.then(result => {
+							console.log(result)
+							res.send('done')
+							db.close()
+						})
+				} else {
+					db
+						.collection('restaurant')
+						.updateOne(
+							{
+								id,
+							},
+							{
+								$push: { users: userId },
+							}
+						)
+						.then(result => {
+							console.log(result)
+							res.send('done')
+							db.close()
+						})
+				}
+			}
+		})
 	})
 
 	app.get('/login', (req, res) => {
