@@ -51,7 +51,29 @@ const startServer = () => {
 	}
 	app.use(cors(corsOptions))
 
+	const authenticateToken = (req, res, next) => {
+		const [accessToken, accessSecret] = req.headers.authorization.split('.')
+		oa.get(
+			'https://api.twitter.com/1.1/account/verify_credentials.json',
+			accessToken, //test user token
+			accessSecret, //test user secret
+			(error, data, res) => {
+				if (error) {
+					console.error(error)
+					res.status(401).send('Fail!')
+				}
+				console.log(require('util').inspect(data))
+				next()
+			}
+		)
+	}
+
 	app.get('/', (req, res) => res.send('Hello world!'))
+
+	app.get('/testAuth', authenticateToken, (req, res) => {
+		console.log('Authenticated!')
+		res.send('Authenticated!')
+	})
 
 	app.post('/restaurants', async (req, res) => {
 		const location = req.body.location
@@ -73,35 +95,34 @@ const startServer = () => {
 			)
 			.then(response => response)
 			.catch(error => error)
-		console.log(result)
-		// if (response && response.data) {
-		// 	const restaurantList = response.data.data.search.business.reduce((obj, item) => {
-		// 		obj[item.id] = Object.assign({}, item, { count: 0 })
-		// 		return obj
-		// 	}, {})
-		// 	const restaurantIds = Object.keys(restaurantList)
-		// 	connectToDatabase(res, db => {
-		// 		db
-		// 			.collection('restaurant')
-		// 			.aggregate([
-		// 				{
-		// 					$match: { id: { $in: restaurantIds } },
-		// 				},
-		// 				{
-		// 					$group: { _id: '$id', count: { $sum: 1 } },
-		// 				},
-		// 			])
-		// 			.toArray(function(err, result) {
-		// 				result.forEach(restaurant => {
-		// 					restaurantList[restaurant._id].count = restaurant.count
-		// 				})
-		// 				res.json(restaurantList)
-		// 				db.close()
-		// 			})
-		// 	})
-		// } else {
-		// 	res.status(500).send('Server error: no response from Yelp')
-		// }
+		if (response && response.data) {
+			const restaurantList = response.data.data.search.business.reduce((obj, item) => {
+				obj[item.id] = Object.assign({}, item, { count: 0 })
+				return obj
+			}, {})
+			const restaurantIds = Object.keys(restaurantList)
+			connectToDatabase(res, db => {
+				db
+					.collection('restaurant')
+					.aggregate([
+						{
+							$match: { id: { $in: restaurantIds } },
+						},
+						{
+							$group: { _id: '$id', count: { $sum: 1 } },
+						},
+					])
+					.toArray(function(err, result) {
+						result.forEach(restaurant => {
+							restaurantList[restaurant._id].count = restaurant.count
+						})
+						res.json(restaurantList)
+						db.close()
+					})
+			})
+		} else {
+			res.status(500).send('Server error: no response from Yelp')
+		}
 	})
 
 	app.get('/login', (req, res) => {
@@ -128,21 +149,6 @@ const startServer = () => {
 			)
 		}
 		oa.getOAuthAccessToken(token, secret, verifier, callback)
-	})
-
-	app.get('/tweet', (req, res) => {
-		const accessToken = req.query.access_token
-		const accessSecret = req.query.access_secret
-		oa.get(
-			'https://api.twitter.com/1.1/account/verify_credentials.json',
-			accessToken, //test user token
-			accessSecret, //test user secret
-			function(e, data, res) {
-				if (e) console.error(e)
-				console.log(require('util').inspect(data))
-				done()
-			}
-		)
 	})
 
 	return new Promise(resolve => {
