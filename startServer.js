@@ -69,13 +69,6 @@ const startServer = () => {
 		)
 	}
 
-	app.get('/', (req, res) => res.send('Hello world!'))
-
-	app.get('/testAuth', authenticateToken, (req, res) => {
-		console.log('Authenticated!', req.user.screen_name)
-		res.send('Authenticated!')
-	})
-
 	app.post('/restaurants', async (req, res) => {
 		const location = req.body.location
 		const result = await axios
