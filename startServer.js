@@ -89,23 +89,31 @@ const startServer = () => {
 			.then(response => response.data)
 			.catch(error => error)
 		if (result) {
-			const restaurantList = result.data.search.business.reduce((obj, item) => {
-				obj[item.id] = Object.assign({}, item, { count: 0 })
-				return obj
-			}, {})
-			const restaurantIds = Object.keys(restaurantList)
-			connectToDatabase(res, db => {
-				db
-					.collection('restaurant')
-					.find()
-					.toArray(function(err, result) {
-						result.forEach(restaurant => {
-							restaurantList[restaurant.id].count = restaurant.users.length
+			if (result.errors && result.errors.length > 0) {
+				res.status(204).send('Could not execute search, try specifying a more exact location.')
+			} else if (result.data) {
+				const restaurantList = result.data.search.business.reduce((obj, item) => {
+					obj[item.id] = Object.assign({}, item, { count: 0 })
+					return obj
+				}, {})
+				const restaurantIds = Object.keys(restaurantList)
+				connectToDatabase(res, db => {
+					db
+						.collection('restaurant')
+						.find({ id: { $in: restaurantIds } })
+						.toArray(function(err, result) {
+							result.forEach(restaurant => {
+								if (restaurantList[restaurant.id] === undefined) {
+									console.error('restaurant not found!')
+								} else {
+									restaurantList[restaurant.id].count = restaurant.users.length
+								}
+							})
+							res.json(restaurantList)
+							db.close()
 						})
-						res.json(restaurantList)
-						db.close()
-					})
-			})
+				})
+			}
 		} else {
 			res.status(500).send('Server error: no response from Yelp')
 		}
