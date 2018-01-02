@@ -21,6 +21,4 @@ test('return 20 restaurants', async () => {
 	// 	.catch(error => error)
 	// const restaurants = await api.get('/restaurants')
 	// console.log(response)
-	const response = await axios.get('http://localhost:8000/').then(response => response.data)
-	expect(response).toBe('Hello world!')
 })
