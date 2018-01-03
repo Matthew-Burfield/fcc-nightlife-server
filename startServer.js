@@ -138,7 +138,7 @@ const startServer = () => {
 						})
 						.then(result => {
 							console.log(result)
-							res.send('done')
+							res.send('increased')
 							db.close()
 						})
 				} else {
@@ -155,7 +155,7 @@ const startServer = () => {
 							)
 							.then(result => {
 								console.log(result)
-								res.send('done')
+								res.send('decreased')
 								db.close()
 							})
 					} else {
@@ -171,7 +171,7 @@ const startServer = () => {
 							)
 							.then(result => {
 								console.log(result)
-								res.send('done')
+								res.send('increased')
 								db.close()
 							})
 					}
