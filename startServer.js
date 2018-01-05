@@ -7,7 +7,7 @@ const nodeUrl = require('url')
 const oauth = require('oauth').OAuth
 const getBaseUrl = require('./utilities').getBaseUrl
 
-axios.defaults.baseURL = 'https://api.yelp.com'
+axios.defaults.baseURL = 'https://api.yelp.com/v3'
 axios.defaults.headers.common['Authorization'] = `Bearer ${process.env.YELP_API_KEY}`
 axios.defaults.headers.common['Accept-Language'] = 'en_US'
 axios.defaults.headers.post['Content-Type'] = 'application/graphql'
@@ -71,28 +71,30 @@ const startServer = () => {
 
 	app.post('/restaurants', async (req, res) => {
 		const location = req.body.location
+		// const result = await axios
+		// 	.post(
+		// 		'/v3/graphql',
+		// 		`{
+		// 			search(location: "${location}") {
+		// 				total
+		// 				business {
+		// 						name
+		// 						id
+		// 						rating
+		// 						photos
+		// 					}
+		// 			}
+		// 		}`
+		// 	)
 		const result = await axios
-			.post(
-				'/v3/graphql',
-				`{
-					search(location: "${location}") {
-						total
-						business {
-								name
-								id
-								rating
-								photos
-							}
-					}
-				}`
-			)
+			.get(`/businesses/search?location=${location}`)
 			.then(response => response.data)
 			.catch(error => error)
 		if (result) {
 			if (result.errors && result.errors.length > 0) {
 				res.status(204).send('Could not execute search, try specifying a more exact location.')
-			} else if (result.data) {
-				const restaurantList = result.data.search.business.reduce((obj, item) => {
+			} else if (result.businesses) {
+				const restaurantList = result.businesses.reduce((obj, item) => {
 					obj[item.id] = Object.assign({}, item, { count: 0 })
 					return obj
 				}, {})
@@ -137,7 +139,6 @@ const startServer = () => {
 							users: [userId],
 						})
 						.then(result => {
-							console.log(result)
 							res.send('increased')
 							db.close()
 						})
@@ -154,7 +155,6 @@ const startServer = () => {
 								}
 							)
 							.then(result => {
-								console.log(result)
 								res.send('decreased')
 								db.close()
 							})
@@ -170,7 +170,6 @@ const startServer = () => {
 								}
 							)
 							.then(result => {
-								console.log(result)
 								res.send('increased')
 								db.close()
 							})
